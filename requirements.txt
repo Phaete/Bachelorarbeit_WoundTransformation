@@ -1,0 +1,5 @@
+numpy
+PyYAML
+opencv-python
+matplotlib
+libuvc
