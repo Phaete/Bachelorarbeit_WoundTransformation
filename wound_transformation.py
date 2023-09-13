@@ -93,7 +93,7 @@ def point_pos_relative_to_vector(point, end, start):
         return "on"
 
 
-def create_new_point_on_same_side(ratio, rel_pos, end, start, distance, ratio_triangle):
+def convert_to_reference(ratio, rel_pos, end, start, distance, ratio_triangle):
     # Calculate the vector from start to end
     _vector = end - start
 
@@ -182,22 +182,22 @@ class WoundTransformation:
             # limb's area
             # ratio = w/l -> l = w / ratio
             self._pose_pair_ratio = {
-                '[0, 1]': 2,
-                '[1, 2]': 1,
-                '[2, 3]': 2.5,
-                '[3, 4]': 2.5,
-                '[1, 5]': 1,
-                '[5, 6]': 2.5,
-                '[6, 7]': 2.5,
-                '[1, 8]': 1.25,
-                '[8, 9]': 0.4,
-                '[9, 10]': 2.5,
-                '[10, 11]': 4,
-                '[11, 22]': 1.5,
-                '[8, 12]': 0.4,
-                '[12, 13]': 2.5,
-                '[13, 14]': 4,
-                '[14, 19]': 1.5
+                '[0, 1]': 4,
+                '[1, 2]': 2,
+                '[2, 3]': 5,
+                '[3, 4]': 5,
+                '[1, 5]': 2,
+                '[5, 6]': 5,
+                '[6, 7]': 5,
+                '[1, 8]': 2.5,
+                '[8, 9]': 0.8,
+                '[9, 10]': 5,
+                '[10, 11]': 8,
+                '[11, 22]': 3,
+                '[8, 12]': 0.8,
+                '[12, 13]': 5,
+                '[13, 14]': 8,
+                '[14, 19]': 3
             }
 
             # OpenPose Joint Descriptions
@@ -232,6 +232,7 @@ class WoundTransformation:
     # experiments. The width of the limb is ONLY VALID FOR THE STANDARD male_100_renderer.png and has to be
     # re-calculated for any other standard!
     def inside_limb_area(self, closest_pair):
+        print("inside limb area - closest pair", closest_pair)
         pair = list(closest_pair[0])
         distance = closest_pair[1]
         _limb_length = np.linalg.norm(
@@ -257,17 +258,20 @@ class WoundTransformation:
             print('Head Width: ', _head_width)
             return distance < _head_width
         elif pair in [[11, 22], [22, 23], [11, 24]]:
+            _limb_width = _limb_length / self._pose_pair_ratio[str([11, 22])]
             print('Distance: ', distance)
-            print('Limb Width: ', _limb_length / self._pose_pair_ratio[str([11, 22])])
-            return distance < _limb_length / self._pose_pair_ratio[str([11, 22])]/1.5
+            print('Limb Width: ', _limb_width)
+            return distance < _limb_length / self._pose_pair_ratio[str([11, 22])]
         elif pair in [[14, 19], [19, 20], [14, 21]]:
+            _limb_width = _limb_length / self._pose_pair_ratio[str([14, 19])]
             print('Distance: ', distance)
-            print('Limb Width: ', _limb_length / self._pose_pair_ratio[str([14, 19])])
-            return distance < _limb_length / self._pose_pair_ratio[str([14, 19])]/1.5
+            print('Limb Width: ', _limb_width)
+            return distance < _limb_width
         else:
+            _limb_width = _limb_length / self._pose_pair_ratio[str([pair])]
             print('Distance: ', distance)
-            print('Limb Width: ', _limb_length / self._pose_pair_ratio[str(pair)])
-            return distance < _limb_length / self._pose_pair_ratio[str(pair)]/1.5
+            print('Limb Width: ', _limb_width)
+            return distance < _limb_width
 
     def locate_wounds(self, image, keypoints, wounds, depth_image, num):
         # Load image
@@ -395,7 +399,7 @@ class WoundTransformation:
             _point_key_e = np.array([self.keypoints_standard[key[1]]['x'], self.keypoints_standard[key[1]]['y']])
             _vec_standard = _point_key_e - _point_key_s
             # Convert wound position from camera view to standard view
-            _conv_wound = create_new_point_on_same_side(
+            _conv_wound = convert_to_reference(
                 _dist_ratio,
                 _rel_pos_wound,
                 np.array([_point_key_e[0], _point_key_e[1]]),
@@ -420,7 +424,7 @@ class WoundTransformation:
                 _overlay = cv2.circle(_overlay, (np.round(wound[0]).astype('int'), np.round(wound[1]).astype('int')), 5,
                                       (0, 0, 255), 2)
         cv2.imshow("standard view", _overlay)
-        cv2.waitKey(10)
+        cv2.waitKey(10000)
         return _overlay
 
     def save_images(self, **kwargs):
@@ -530,7 +534,7 @@ class WoundTransformation:
             _vec_original = _point_key_e - _point_key_s
             # Convert wound position from camera view to standard view
             _reprojected_wounds.append(
-                create_new_point_on_same_side(
+                convert_to_reference(
                     _dist_ratio,
                     _rel_pos_wound,
                     _point_key_e,

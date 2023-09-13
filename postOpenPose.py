@@ -208,13 +208,13 @@ def main(**kwargs):
             # Step 2: Transfer converted wounds onto the standard view
             _img_conv = wound_transform.transform_view(_conv_wounds)
             # Step 2.5: Save image to output
-            wound_transform.save_images(after=_img_conv, num=_num)
+            #wound_transform.save_images(after=_img_conv, num=_num)
             # Step 3: Re-project converted wounds onto original image
-            _reprojected_wounds = wound_transform.reproject_wounds(_keypoints, _wounds, _conv_wounds)
+            #_reprojected_wounds = wound_transform.reproject_wounds(_keypoints, _wounds, _conv_wounds)
             # Step 4: Calculate and display reprojected error
-            wound_transform.display_error(_img, _wounds, _reprojected_wounds, image_num=_num)
-            error_per_wound = wound_transformation.calculate_reprojection_error(_wounds, _reprojected_wounds)
-            wound_transform.plot_error(error_per_wound, image=_num)
+            #wound_transform.display_error(_img, _wounds, _reprojected_wounds, image_num=_num)
+            #error_per_wound = wound_transformation.calculate_reprojection_error(_wounds, _reprojected_wounds)
+            #wound_transform.plot_error(error_per_wound, image=_num)
     else:
         # No local data acquisition, use ROS
         wound_transformation_ros_node.WoundTransformROSNode()
@@ -240,6 +240,4 @@ if __name__ == '__main__':
     Example for ROS:
     main()
     """
-    main(mode='image', image_num=0, skeleton='openpose', host='local')
-    #main(mode='video', video_name='sampleVid_short.avi', host='local')
-    #main()
+    main()

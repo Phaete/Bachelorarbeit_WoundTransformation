@@ -23,8 +23,8 @@ except:
 
 
 class WoundTransformROSNode:
-    def test(self):
-        pass
+    # def test(self):
+    #     pass
 
     def __init__(self, **kwargs):
         self.base_path = os.path.dirname(
